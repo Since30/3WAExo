@@ -41,5 +41,12 @@ body{
     flex-wrap: wrap;
     justify-content: space-around;
 }
+#pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    justify-content: space-between;
+   
+}
 
 
