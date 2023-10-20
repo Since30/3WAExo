@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   console.log("Le DOM est chargé.");
 
-  let preventAutoDisplay = false; // Nouvelle ligne ajoutée
+  let preventAutoDisplay = false;
 
   const adresseAPI = "https://api-adresse.data.gouv.fr/search/";
   const cinemasAPI = "https://data.culture.gouv.fr/api/records/1.0/search/";
@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
           };
           console.log("Coordonnées récupérées :", userCoords);
           fetchAdresseFromCoords(userCoords);
-          map.setView([userCoords.latitude, userCoords.longitude], 13);
         });
       } else {
         alert(
@@ -151,8 +150,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const distanceEnKilometres = calculateDistance(
         userCoords.latitude,
         userCoords.longitude,
-        cinema.fields.lat || 0, // Utilisation de 0 comme valeur par défaut si non défini
-        cinema.fields.lon || 0 // Utilisation de 0 comme valeur par défaut si non défini
+        cinema.fields.latitude || 0,
+        cinema.fields.longitude || 0
       );
 
       distance.textContent = `Distance : ${distanceEnKilometres} km`;
@@ -164,13 +163,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       cinemasContainer.appendChild(cinemaElement);
 
-      if (cinema.fields.lat !== undefined && cinema.fields.lon !== undefined) {
-        L.marker([cinema.fields.lat, cinema.fields.lon])
+      if (
+        cinema.fields.latitude !== undefined &&
+        cinema.fields.longitude !== undefined
+      ) {
+        L.marker([cinema.fields.latitude, cinema.fields.longitude])
           .addTo(mapReference)
           .bindPopup(cinema.fields.nom_etablissement);
       }
     });
   }
-
-  // ... (suite du code)
 });
