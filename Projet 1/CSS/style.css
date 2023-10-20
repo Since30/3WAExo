@@ -1,0 +1,43 @@
+body{
+    background-color: #f2f2f2;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+.movie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 200px; /* Largeur de chaque carte */
+}
+
+.movie img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.movie h2 {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.movie p {
+    font-size: 0.9em;
+    text-align: center;
+}
+
+#results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+
