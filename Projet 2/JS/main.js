@@ -1,39 +1,49 @@
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("Le DOM est chargé.");
+
+  let preventAutoDisplay = false; // Nouvelle ligne ajoutée
+
   const adresseAPI = "https://api-adresse.data.gouv.fr/search/";
   const cinemasAPI = "https://data.culture.gouv.fr/api/records/1.0/search/";
   let userCoords = null;
   let mapReference = null;
 
-  // Fonction pour initialiser la carte
   function initializeMap() {
-    const map = L.map("map").setView([48.8534, 2.3488], 13); // Coordonnées de Paris
+    console.log("Initialisation de la carte...");
+    const map = L.map("map").setView([46.603354, 1.888334], 6);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
         "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
     }).addTo(map);
 
-    return map; // Retourne la référence de la carte
+    return map;
   }
 
-  // Appel de la fonction pour initialiser la carte
   mapReference = initializeMap();
+  console.log("Carte initialisée.");
 
   document
     .querySelector("#geolocaliserButton")
     .addEventListener("click", function () {
+      console.log("Bouton de géolocalisation cliqué.");
       if (navigator.geolocation) {
+        console.log("La géolocalisation est supportée par le navigateur.");
         navigator.geolocation.getCurrentPosition(function (position) {
           userCoords = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           };
-
+          console.log("Coordonnées récupérées :", userCoords);
           fetchAdresseFromCoords(userCoords);
+          map.setView([userCoords.latitude, userCoords.longitude], 13);
         });
       } else {
         alert(
           "La géolocalisation n'est pas prise en charge par votre navigateur."
+        );
+        console.log(
+          "La géolocalisation n'est pas supportée par le navigateur."
         );
       }
     });
@@ -41,31 +51,39 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .querySelector("#searchForm")
     .addEventListener("submit", function (event) {
+      console.log("Formulaire de recherche soumis.");
       event.preventDefault();
+      const adresse = document.querySelector("#adresseInput").value;
 
-      const userAdresse = document.querySelector("#adresseInput").value; // Changement ici
-
-      if (userAdresse.trim() === "") {
-        // Changement ici
+      if (adresse.trim() === "") {
         alert("Veuillez entrer une adresse.");
+        console.log("Aucune adresse saisie.");
         return;
       }
 
       preventAutoDisplay = true;
-      fetchCoordsFromAdresse(userAdresse); // Changement ici
+      console.log("Adresse saisie :", adresse);
+      fetchCoordsFromAdresse(adresse);
     });
 
   function fetchAdresseFromCoords(coords) {
+    console.log("Récupération de l'adresse à partir des coordonnées...");
     const url = `${adresseAPI}?q=${coords.latitude},${coords.longitude}&limit=1`;
+    console.log("URL pour la requête d'adresse :", url);
+
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
         const adresse = data.features[0].properties.label;
         document.querySelector("#adresseInput").value = adresse;
-
-        fetchCoordsFromAdresse(adresse);
+        console.log("Adresse récupérée :", adresse);
       })
-      .catch((error) => console.error("Erreur:", error));
+      .catch((error) => console.error("Erreur:", error))
+      .finally(() => {
+        if (!preventAutoDisplay) {
+          fetchCinemas(userCoords);
+        }
+      });
   }
 
   function fetchCoordsFromAdresse(adresse) {
@@ -83,14 +101,11 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => console.error("Erreur:", error));
   }
 
-  document
-    .querySelector("#adresseInput")
-    .addEventListener("input", function () {
-      preventAutoDisplay = false;
-    });
-
   function fetchCinemas(coords) {
+    console.log("Récupération des cinémas...");
     const url = `${cinemasAPI}?dataset=etablissements-cinematographiques&geofilter.distance=${coords.latitude},${coords.longitude},10000`;
+    console.log("URL pour la requête des cinémas :", url);
+
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
@@ -98,7 +113,6 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => console.error("Erreur:", error));
   }
-
   function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -112,9 +126,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
     return distance.toFixed(2);
+    console.log("Distance calculée :", distance.toFixed(2));
   }
 
   function displayCinemas(cinemas) {
+    console.log("Affichage des cinémas...");
     const cinemasContainer = document.querySelector("#cinemasContainer");
     cinemasContainer.innerHTML = "";
 
@@ -148,7 +164,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       cinemasContainer.appendChild(cinemaElement);
 
-      // Vérifier si les coordonnées sont définies avant d'ajouter le marqueur
       if (cinema.fields.lat !== undefined && cinema.fields.lon !== undefined) {
         L.marker([cinema.fields.lat, cinema.fields.lon])
           .addTo(mapReference)
@@ -156,4 +171,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+
+  // ... (suite du code)
 });
